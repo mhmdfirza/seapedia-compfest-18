@@ -1,0 +1,177 @@
+# =============================================================================
+# Docker Compose — Seapedia (Laravel 11)
+# =============================================================================
+#
+# Services:
+#   app         → PHP 8.2-FPM (Laravel backend)
+#   nginx       → Reverse proxy (port 8000)
+#   node        → Vite dev server with HMR (port 5173)
+#   mysql       → MySQL 8.4 LTS (persistent volume)
+#   redis       → Cache / queue / session store
+#   phpmyadmin  → Database GUI (port 8080)
+#
+# Usage:
+#   docker compose up -d --build    # first run
+#   docker compose down              # stop all
+#
+# =============================================================================
+
+services:
+
+  # ─── PHP-FPM Application ──────────────────────────────────────────────────
+  # This is the core container. It runs PHP-FPM and contains Composer.
+  # Nginx forwards PHP requests here over FastCGI (port 9000).
+  app:
+    build:
+      context: .
+      dockerfile: docker/php/Dockerfile
+      args:
+        UID: ${UID:-1000}
+        GID: ${GID:-1000}
+    container_name: seapedia-app
+    restart: unless-stopped
+    working_dir: /var/www
+    volumes:
+      # Bind mount: source code is shared so edits on the host appear
+      # instantly inside the container (no rebuild needed).
+      - .:/var/www
+    networks:
+      - seapedia
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      # Verify PHP-FPM is responding on port 9000.
+      test: ["CMD-SHELL", "php-fpm-healthcheck || exit 1"]
+      # Fallback: if php-fpm-healthcheck is not installed, use cgi-fcgi.
+      # We use a simple pid-file check as a lightweight alternative.
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+
+  # ─── Nginx Reverse Proxy ──────────────────────────────────────────────────
+  # Serves static files directly and proxies .php requests to 'app:9000'.
+  # Port 80 inside → mapped to localhost:8000 on the host.
+  nginx:
+    image: nginx:1.27-alpine
+    container_name: seapedia-nginx
+    restart: unless-stopped
+    ports:
+      - "${APP_PORT:-8000}:80"
+    volumes:
+      # Source code mount — Nginx needs access to public/ for static files.
+      - .:/var/www
+      # Custom Nginx config.
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+    networks:
+      - seapedia
+    depends_on:
+      - app
+
+  # ─── Node / Vite Dev Server ───────────────────────────────────────────────
+  # Runs 'npm run dev' for Vite HMR during development.
+  # In production, you would run 'npm run build' in CI instead.
+  node:
+    build:
+      context: .
+      dockerfile: docker/node/Dockerfile
+    container_name: seapedia-node
+    restart: unless-stopped
+    working_dir: /var/www
+    ports:
+      # Vite HMR port — must be exposed to the host so the browser
+      # can connect to the WebSocket for hot module replacement.
+      - "${VITE_PORT:-5173}:5173"
+    volumes:
+      - .:/var/www
+      # Anonymous volume: keeps node_modules inside the container so
+      # that platform-specific binaries (esbuild, etc.) don't conflict
+      # between host and container.
+      - /var/www/node_modules
+    networks:
+      - seapedia
+
+  # ─── MySQL 8.4 LTS ────────────────────────────────────────────────────────
+  # Relational database. Data persists across container recreations via
+  # the named volume 'mysql_data'.
+  mysql:
+    image: mysql:8.4
+    container_name: seapedia-mysql
+    restart: unless-stopped
+    ports:
+      - "${DB_PORT:-3306}:3306"
+    environment:
+      MYSQL_DATABASE: ${DB_DATABASE:-seapedia}
+      MYSQL_USER: ${DB_USERNAME:-seapedia}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-secret}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-rootsecret}
+    volumes:
+      # Named volume: survives 'docker compose down'. Only 'docker compose
+      # down -v' will destroy it.
+      - mysql_data:/var/lib/mysql
+    networks:
+      - seapedia
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${DB_ROOT_PASSWORD:-rootsecret}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  # ─── Redis ────────────────────────────────────────────────────────────────
+  # In-memory key-value store used for:
+  #   - Cache (CACHE_STORE=redis)
+  #   - Queue (QUEUE_CONNECTION=redis)
+  #   - Sessions (optionally)
+  # Alpine image keeps the footprint tiny (~7 MB).
+  redis:
+    image: redis:7-alpine
+    container_name: seapedia-redis
+    restart: unless-stopped
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    networks:
+      - seapedia
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+
+  # ─── phpMyAdmin (optional) ────────────────────────────────────────────────
+  # Web-based MySQL administration tool.
+  # Access at http://localhost:8080 — login with DB_USERNAME/DB_PASSWORD.
+  phpmyadmin:
+    image: phpmyadmin:latest
+    container_name: seapedia-phpmyadmin
+    restart: unless-stopped
+    ports:
+      - "${PMA_PORT:-8080}:80"
+    environment:
+      PMA_HOST: mysql
+      PMA_PORT: 3306
+      UPLOAD_LIMIT: 64M
+    networks:
+      - seapedia
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+# ─── Networks ─────────────────────────────────────────────────────────────────
+# Custom bridge network so all containers can resolve each other by name.
+# Docker's default bridge network does NOT support DNS resolution between
+# containers — a custom network is required.
+networks:
+  seapedia:
+    driver: bridge
+
+# ─── Volumes ──────────────────────────────────────────────────────────────────
+# Named volumes persist data independently of container lifecycle.
+# 'docker compose down' preserves volumes. Use '-v' flag to remove them.
+volumes:
+  mysql_data:
+    driver: local

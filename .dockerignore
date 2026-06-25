@@ -1,0 +1,42 @@
+# =============================================================================
+# .dockerignore — Exclude files from the Docker build context
+# =============================================================================
+# Smaller build context = faster builds and smaller images.
+# None of these files are needed inside the containers.
+
+# Dependencies (installed inside containers)
+vendor/
+node_modules/
+
+# Version control
+.git/
+.gitignore
+.gitattributes
+
+# IDE / editor files
+.idea/
+.vscode/
+.fleet/
+.nova/
+.zed/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Laravel storage (logs, cache — ephemeral)
+storage/logs/*
+storage/framework/cache/*
+storage/framework/sessions/*
+storage/framework/views/*
+
+# Docker (avoid recursive context)
+docker-compose.override.yml
+
+# CI / misc
+.github/
+tests/
+*.md
+Makefile
