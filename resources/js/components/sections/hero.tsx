@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from '@inertiajs/react';
-import Container from '@/components/ui/container';
-import Button from '@/components/ui/button';
+import Container from 'res/components/ui/container';
+import Button from 'res/components/ui/button';
 
 const categories = [
     { name: 'Elektronik', emoji: '📱', color: 'bg-blue-50 text-blue-600', href: '/products?category=Elektronik' },

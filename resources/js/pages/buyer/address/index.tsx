@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { Head } from '@inertiajs/react';
-import Navbar from '@/components/sections/navbar';
-import Container from '@/components/ui/container';
-import SectionTitle from '@/components/ui/sectiontitle';
-import Button from '@/components/ui/button';
-import Badge from '@/components/ui/badge';
+import Navbar from 'res/components/sections/navbar';
+import Container from 'res/components/ui/container';
+import SectionTitle from 'res/components/ui/sectiontitle';
+import Button from 'res/components/ui/button';
+import Badge from 'res/components/ui/badge';
 
 const MOCK_ADDRESSES = [
     {

@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { Head, Link } from '@inertiajs/react';
-import Navbar from '@/components/sections/navbar';
-import Footer from '@/components/sections/footer';
-import Container from '@/components/ui/container';
-import Badge from '@/components/ui/badge';
+import Navbar from 'res/components/sections/navbar';
+import Footer from 'res/components/sections/footer';
+import Container from 'res/components/ui/container';
+import Badge from 'res/components/ui/badge';
 
 function formatPrice(p: number) {
     return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(p);

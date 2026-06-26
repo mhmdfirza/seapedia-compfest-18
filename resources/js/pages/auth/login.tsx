@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { Head, Link, useForm } from '@inertiajs/react';
-import Logo from '@/components/ui/logo';
-import Input from '@/components/ui/input';
-import Button from '@/components/ui/button';
+import Logo from 'res/components/ui/logo';
+import Input from 'res/components/ui/input';
+import Button from 'res/components/ui/button';
 
 export default function Login() {
     const [showPassword, setShowPassword] = useState(false);

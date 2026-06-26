@@ -1,12 +1,12 @@
 import React from 'react';
 import { Head, Link } from '@inertiajs/react';
-import Navbar from '@/components/sections/navbar';
-import Footer from '@/components/sections/footer';
-import Container from '@/components/ui/container';
-import SectionTitle from '@/components/ui/sectiontitle';
-import Badge from '@/components/ui/badge';
-import Button from '@/components/ui/button';
-import ProductCard from '@/components/ui/productcard';
+import Navbar from 'res/components/sections/navbar';
+import Footer from 'res/components/sections/footer';
+import Container from 'res/components/ui/container';
+import SectionTitle from 'res/components/ui/sectiontitle';
+import Badge from 'res/components/ui/badge';
+import Button from 'res/components/ui/button';
+import ProductCard from 'res/components/ui/productcard';
 
 function formatPrice(p: number) {
     return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(p);
@@ -20,10 +20,10 @@ const RECOMMENDED = [
 ];
 
 const QUICK_LINKS = [
-    { label: 'Pesanan Saya', href: '/buyer/orders', icon: '📦' },
-    { label: 'Keranjang', href: '/buyer/cart', icon: '🛒' },
-    { label: 'Dompet', href: '/buyer/wallet', icon: '💰' },
-    { label: 'Alamat', href: '/buyer/address', icon: '📍' },
+    { label: 'Pesanan Saya', href: '/dashboard/buyer/orders', icon: '📦' },
+    { label: 'Keranjang', href: '/dashboard/buyer/cart', icon: '🛒' },
+    { label: 'Dompet', href: '/dashboard/buyer/wallet', icon: '💰' },
+    { label: 'Alamat', href: '/dashboard/buyer/address', icon: '📍' },
     { label: 'Ulasan', href: '#', icon: '⭐' },
     { label: 'Bantuan', href: '#', icon: '💬' },
 ];
@@ -43,10 +43,10 @@ export default function BuyerDashboard() {
                             <p className="text-white/80 text-sm mt-1">Member sejak Juni 2024 · Saldo: {formatPrice(1452000)}</p>
                         </div>
                         <div className="hidden sm:flex flex-col gap-2">
-                            <Link href="/buyer/wallet">
+                            <Link href="/dashboard/buyer/wallet">
                                 <Button size="sm" className="bg-white text-primary hover:bg-primary-light border-transparent font-semibold">Top Up Saldo</Button>
                             </Link>
-                            <Link href="/buyer/orders">
+                            <Link href="/dashboard/buyer/orders">
                                 <Button size="sm" className="bg-white/20 text-white hover:bg-white/30 border border-white/30">Lacak Pesanan</Button>
                             </Link>
                         </div>
@@ -65,7 +65,7 @@ export default function BuyerDashboard() {
 
                     {/* Active Orders */}
                     <div className="bg-white rounded-xl border border-border p-4 mb-5">
-                        <SectionTitle title="Pesanan Aktif" action={<Link href="/buyer/orders" className="text-primary text-xs hover:underline">Lihat Semua →</Link>} />
+                        <SectionTitle title="Pesanan Aktif" action={<Link href="/dashboard/buyer/orders" className="text-primary text-xs hover:underline">Lihat Semua →</Link>} />
                         <div className="flex items-center gap-4 p-3 bg-primary-light rounded-xl">
                             <div className="text-2xl">🚚</div>
                             <div className="flex-1">

@@ -1,5 +1,5 @@
 import React from 'react';
-import { cn } from '@/lib/utils';
+import { cn } from 'res/lib/utils';
 
 type SectionTitleProps = {
     title: string;

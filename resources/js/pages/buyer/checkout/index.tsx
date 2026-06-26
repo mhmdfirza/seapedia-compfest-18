@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { Head, Link } from '@inertiajs/react';
-import Navbar from '@/components/sections/navbar';
-import Container from '@/components/ui/container';
-import Button from '@/components/ui/button';
+import Navbar from 'res/components/sections/navbar';
+import Container from 'res/components/ui/container';
+import Button from 'res/components/ui/button';
 
 function formatPrice(p: number) {
     return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(p);
@@ -43,7 +43,7 @@ export default function CheckoutIndex() {
                             <div className="bg-white rounded-xl border border-border p-5">
                                 <div className="flex items-center justify-between mb-4">
                                     <h2 className="font-semibold text-neutral-dark">📍 Alamat Pengiriman</h2>
-                                    <Link href="/buyer/address" className="text-xs text-primary hover:underline">Ganti Alamat</Link>
+                                    <Link href="/dashboard/buyer/address" className="text-xs text-primary hover:underline">Ganti Alamat</Link>
                                 </div>
                                 <div className="bg-primary-light rounded-lg p-3">
                                     <div className="flex items-start gap-2">

@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { Head, Link } from '@inertiajs/react';
-import Navbar from '@/components/sections/navbar';
-import Container from '@/components/ui/container';
-import Badge from '@/components/ui/badge';
-import Button from '@/components/ui/button';
-import SectionTitle from '@/components/ui/sectiontitle';
+import Navbar from 'res/components/sections/navbar';
+import Container from 'res/components/ui/container';
+import Badge from 'res/components/ui/badge';
+import Button from 'res/components/ui/button';
+import SectionTitle from 'res/components/ui/sectiontitle';
 
 function formatPrice(p: number) {
     return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(p);
