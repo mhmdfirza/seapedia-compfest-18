@@ -9,6 +9,7 @@
         "@inertiajs/react": "^3.4.0",
         "@types/react": "^19.2.17",
         "@types/react-dom": "^19.2.3",
+        "@vitejs/plugin-react": "^4.7.0",
         "autoprefixer": "^10.4.20",
         "axios": "^1.7.4",
         "concurrently": "^9.0.1",
@@ -21,7 +22,9 @@
         "vite": "^6.0.11"
     },
     "dependencies": {
+        "clsx": "^2.1.1",
         "inertiajs": "^0.0.0",
-        "lucide-react": "^1.21.0"
+        "lucide-react": "^1.21.0",
+        "tailwind-merge": "^3.6.0"
     }
 }

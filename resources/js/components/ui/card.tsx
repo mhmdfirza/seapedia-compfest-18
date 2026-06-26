@@ -1,10 +1,17 @@
-type CardProps = {
-    children: React.ReactNode;
-}
+import React from 'react';
+import { cn } from '@/lib/utils';
 
-export default function Card({ children }: CardProps) {
+type CardProps = React.HTMLAttributes<HTMLDivElement>;
+
+export default function Card({ children, className, ...props }: CardProps) {
     return (
-        <div className={`rounded-lg border bg-white p-4`}>
+        <div
+            className={cn(
+                "rounded-xl border border-border bg-white shadow-sm hover:shadow-md transition-shadow duration-200",
+                className
+            )}
+            {...props}
+        >
             {children}
         </div>
     );

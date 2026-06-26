@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from '@inertiajs/react';
 
 type NavLinkProps = {
     href: string;
@@ -10,11 +11,11 @@ export default function NavLink({
     children,
 }: NavLinkProps) {
     return (
-        <a
+        <Link
             href={href}
             className="font-medium text-gray-600 transition hover:text-blue-600"
         >
             {children}
-        </a>
+        </Link>
     );
 }
