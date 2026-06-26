@@ -1,11 +1,28 @@
-type BadgeProps = {
-    children: React.ReactNode;
-};
+import React from 'react';
+import { cn } from '@/lib/utils';
 
-export default function Badge({ children }: BadgeProps) {
+export interface BadgeProps extends React.HTMLAttributes<HTMLDivElement> {
+    variant?: 'primary' | 'secondary' | 'danger' | 'neutral';
+}
+
+export default function Badge({ children, className, variant = 'primary', ...props }: BadgeProps) {
+    const variants = {
+        primary: "bg-primary-light text-primary-dark font-medium",
+        secondary: "bg-orange-100 text-secondary font-medium",
+        danger: "bg-red-100 text-danger font-medium",
+        neutral: "bg-neutral-light text-neutral-medium font-medium",
+    };
+
     return (
-        <span className="rounded-full bg-blue-100 px-3 py-1 text-sm text-blue-600">
+        <div
+            className={cn(
+                "inline-flex items-center rounded-full px-2.5 py-0.5 text-xs transition-colors",
+                variants[variant],
+                className
+            )}
+            {...props}
+        >
             {children}
-        </span>
+        </div>
     );
 }
