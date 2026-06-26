@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from '@inertiajs/react';
-import Container from '@/components/ui/container';
-import Logo from '@/components/ui/logo';
+import Container from 'res/components/ui/container';
+import Logo from 'res/components/ui/logo';
 
 const footerLinks = {
     'Tentang SEAPEDIA': [

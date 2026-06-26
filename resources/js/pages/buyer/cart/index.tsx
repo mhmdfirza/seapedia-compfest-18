@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { Head, Link } from '@inertiajs/react';
-import Navbar from '@/components/sections/navbar';
-import Footer from '@/components/sections/footer';
-import Container from '@/components/ui/container';
-import Button from '@/components/ui/button';
+import Navbar from 'res/components/sections/navbar';
+import Footer from 'res/components/sections/footer';
+import Container from 'res/components/ui/container';
+import Button from 'res/components/ui/button';
 
 type CartItem = { id: number; title: string; price: number; qty: number; image: string; seller: string; };
 
@@ -104,7 +104,7 @@ export default function CartIndex() {
                                             <span>{formatPrice(total)}</span>
                                         </div>
                                     </div>
-                                    <Link href="/buyer/checkout">
+                                    <Link href="/dashboard/buyer/checkout">
                                         <Button size="lg" className="w-full justify-center" disabled={selectedItems.length === 0}>
                                             Beli ({selectedItems.length})
                                         </Button>

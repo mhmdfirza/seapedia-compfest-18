@@ -1,13 +1,14 @@
 import React from 'react';
 import { Head, Link } from '@inertiajs/react';
-import Navbar from '@/components/sections/navbar';
-import Footer from '@/components/sections/footer';
-import HeroSection from '@/components/sections/hero';
-import Container from '@/components/ui/container';
-import ProductCard from '@/components/ui/productcard';
-import SectionTitle from '@/components/ui/sectiontitle';
-import Button from '@/components/ui/button';
-import Badge from '@/components/ui/badge';
+import Navbar from 'res/components/sections/navbar';
+import Footer from 'res/components/sections/footer';
+import HeroSection from 'res/components/sections/hero';
+import ReviewSection from 'res/components/sections/review';
+import Container from 'res/components/ui/container';
+import ProductCard from 'res/components/ui/productcard';
+import SectionTitle from 'res/components/ui/sectiontitle';
+import Button from 'res/components/ui/button';
+import Badge from 'res/components/ui/badge';
 
 const FEATURED_PRODUCTS = [
     { id: 1, title: 'Wireless Noise-Canceling Headphones Pro Max', price: 1299000, originalPrice: 1999000, rating: 4.8, sold: 2341, location: 'Jakarta Selatan', image: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=400&q=80' },
@@ -132,6 +133,9 @@ export default function Welcome() {
                     </div>
                 </Container>
             </section>
+
+            {/* Ulasan Pengguna SEAPEDIA */}
+            <ReviewSection />
 
             {/* CTA Banner - Become Seller */}
             <section className="py-10 bg-gradient-to-r from-primary to-green-600">

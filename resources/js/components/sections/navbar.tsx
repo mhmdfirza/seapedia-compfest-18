@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { Link, usePage } from '@inertiajs/react';
-import Container from '@/components/ui/container';
-import Logo from '@/components/ui/logo';
-import Button from '@/components/ui/button';
+import Container from 'res/components/ui/container';
+import Logo from 'res/components/ui/logo';
+import Button from 'res/components/ui/button';
 
 // Icons as inline SVG for zero deps
 const SearchIcon = () => (
@@ -78,7 +78,7 @@ export default function Navbar() {
                         {authUser ? (
                             <>
                                 {/* Cart */}
-                                <Link href="/buyer/cart" className="relative p-2 text-neutral-dark hover:text-primary transition-colors">
+                                <Link href="/dashboard/buyer/cart" className="relative p-2 text-neutral-dark hover:text-primary transition-colors">
                                     <CartIcon />
                                     <span className="absolute -top-0.5 -right-0.5 bg-secondary text-white text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center">3</span>
                                 </Link>
@@ -103,21 +103,21 @@ export default function Navbar() {
                                         <div className="absolute right-0 mt-2 w-48 rounded-xl border border-border bg-white shadow-md py-1 z-50">
                                             {authUser.role === 'buyer' && (
                                                 <>
-                                                    <Link href="/buyer/dashboard" className="block px-4 py-2 text-sm text-neutral-dark hover:bg-neutral-light">Dashboard</Link>
-                                                    <Link href="/buyer/orders" className="block px-4 py-2 text-sm text-neutral-dark hover:bg-neutral-light">Pesanan Saya</Link>
-                                                    <Link href="/buyer/wallet" className="block px-4 py-2 text-sm text-neutral-dark hover:bg-neutral-light">Dompet</Link>
+                                                    <Link href="/dashboard/buyer" className="block px-4 py-2 text-sm text-neutral-dark hover:bg-neutral-light">Dashboard</Link>
+                                                    <Link href="/dashboard/buyer/orders" className="block px-4 py-2 text-sm text-neutral-dark hover:bg-neutral-light">Pesanan Saya</Link>
+                                                    <Link href="/dashboard/buyer/wallet" className="block px-4 py-2 text-sm text-neutral-dark hover:bg-neutral-light">Dompet</Link>
                                                 </>
                                             )}
                                             {authUser.role === 'seller' && (
                                                 <>
-                                                    <Link href="/seller/dashboard" className="block px-4 py-2 text-sm text-neutral-dark hover:bg-neutral-light">Dashboard Toko</Link>
+                                                    <Link href="/dashboard/seller" className="block px-4 py-2 text-sm text-neutral-dark hover:bg-neutral-light">Dashboard Toko</Link>
                                                     <Link href="/seller/products" className="block px-4 py-2 text-sm text-neutral-dark hover:bg-neutral-light">Kelola Produk</Link>
                                                     <Link href="/seller/orders" className="block px-4 py-2 text-sm text-neutral-dark hover:bg-neutral-light">Pesanan Masuk</Link>
                                                 </>
                                             )}
                                             {authUser.role === 'driver' && (
                                                 <>
-                                                    <Link href="/driver/dashboard" className="block px-4 py-2 text-sm text-neutral-dark hover:bg-neutral-light">Dashboard Driver</Link>
+                                                    <Link href="/dashboard/driver" className="block px-4 py-2 text-sm text-neutral-dark hover:bg-neutral-light">Dashboard Driver</Link>
                                                     <Link href="/driver/jobs" className="block px-4 py-2 text-sm text-neutral-dark hover:bg-neutral-light">Daftar Pengiriman</Link>
                                                     <Link href="/driver/earnings" className="block px-4 py-2 text-sm text-neutral-dark hover:bg-neutral-light">Penghasilan</Link>
                                                 </>

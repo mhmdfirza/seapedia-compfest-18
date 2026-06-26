@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { Head, Link } from '@inertiajs/react';
-import Navbar from '@/components/sections/navbar';
-import Footer from '@/components/sections/footer';
-import Container from '@/components/ui/container';
-import ProductCard from '@/components/ui/productcard';
-import Badge from '@/components/ui/badge';
+import Navbar from 'res/components/sections/navbar';
+import Footer from 'res/components/sections/footer';
+import Container from 'res/components/ui/container';
+import ProductCard from 'res/components/ui/productcard';
+import Badge from 'res/components/ui/badge';
 
 const ALL_PRODUCTS = [
     { id: 1, title: 'Wireless Noise-Canceling Headphones Pro Max', price: 1299000, originalPrice: 1999000, rating: 4.8, sold: 2341, location: 'Jakarta Selatan', image: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=400&q=80', category: 'Elektronik' },

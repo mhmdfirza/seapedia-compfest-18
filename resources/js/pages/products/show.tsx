@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import { Head, Link } from '@inertiajs/react';
-import Navbar from '@/components/sections/navbar';
-import Footer from '@/components/sections/footer';
-import Container from '@/components/ui/container';
-import Button from '@/components/ui/button';
-import Badge from '@/components/ui/badge';
-import StarRating from '@/components/ui/starrating';
+import Navbar from 'res/components/sections/navbar';
+import Footer from 'res/components/sections/footer';
+import Container from 'res/components/ui/container';
+import Button from 'res/components/ui/button';
+import Badge from 'res/components/ui/badge';
+import StarRating from 'res/components/ui/starrating';
+import Toast from 'res/components/ui/toast';
 
 const MOCK_PRODUCT = {
     id: 1,
@@ -32,11 +33,24 @@ const MOCK_PRODUCT = {
     ],
 };
 
-const REVIEWS = [
-    { id: 1, user: 'Ahmad R.', rating: 5, date: '20 Jun 2025', comment: 'Kualitas suaranya luar biasa. ANC benar-benar bekerja dengan baik di kereta commuter. Highly recommended!' },
-    { id: 2, user: 'Siti F.', rating: 5, date: '18 Jun 2025', comment: 'Pengiriman cepat, packaging aman. Headphone sesuai deskripsi. Puas banget beli di SEAPEDIA.' },
-    { id: 3, user: 'Budi S.', rating: 4, date: '15 Jun 2025', comment: 'Suaranya bagus, tapi earpad sedikit keras untuk pemakaian lama. Overall masih worth the price.' },
+const AVATAR_COLORS = ['bg-rose-500', 'bg-amber-500', 'bg-emerald-500', 'bg-cyan-500', 'bg-violet-500', 'bg-pink-500'];
+
+type ProductReview = {
+    id: number;
+    user: string;
+    rating: number;
+    date: string;
+    comment: string;
+    color: string;
+};
+
+const INITIAL_REVIEWS: ProductReview[] = [
+    { id: 1, user: 'Ahmad R.', rating: 5, date: '20 Jun 2025', comment: 'Kualitas suaranya luar biasa. ANC benar-benar bekerja dengan baik di kereta commuter. Highly recommended!', color: 'bg-rose-500' },
+    { id: 2, user: 'Siti F.', rating: 5, date: '18 Jun 2025', comment: 'Pengiriman cepat, packaging aman. Headphone sesuai deskripsi. Puas banget beli di SEAPEDIA.', color: 'bg-emerald-500' },
+    { id: 3, user: 'Budi S.', rating: 4, date: '15 Jun 2025', comment: 'Suaranya bagus, tapi earpad sedikit keras untuk pemakaian lama. Overall masih worth the price.', color: 'bg-amber-500' },
 ];
+
+const RATING_LABELS: Record<number, string> = { 1: 'Sangat Buruk', 2: 'Buruk', 3: 'Cukup', 4: 'Bagus', 5: 'Sangat Bagus' };
 
 function formatPrice(price: number) {
     return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(price);
@@ -45,7 +59,45 @@ function formatPrice(price: number) {
 export default function ProductShow() {
     const [selectedImage, setSelectedImage] = useState(0);
     const [quantity, setQuantity] = useState(1);
+    const [reviews, setReviews] = useState<ProductReview[]>(INITIAL_REVIEWS);
+    const [showToast, setShowToast] = useState(false);
     const discountPercent = Math.round((1 - MOCK_PRODUCT.price / MOCK_PRODUCT.originalPrice) * 100);
+
+    // Product review form state
+    const [reviewName, setReviewName] = useState('');
+    const [reviewRating, setReviewRating] = useState(0);
+    const [hoverRating, setHoverRating] = useState(0);
+    const [reviewComment, setReviewComment] = useState('');
+    const [reviewErrors, setReviewErrors] = useState<Record<string, string>>({});
+
+    const avgRating = reviews.length ? Math.round((reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length) * 10) / 10 : 0;
+
+    const handleReviewSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        const errs: Record<string, string> = {};
+        if (!reviewName.trim()) errs.name = 'Nama wajib diisi';
+        if (!reviewRating) errs.rating = 'Rating wajib dipilih';
+        if (reviewComment.trim().length < 20) errs.comment = 'Komentar minimal 20 karakter';
+        setReviewErrors(errs);
+        if (Object.keys(errs).length > 0) return;
+
+        const newReview: ProductReview = {
+            id: Date.now(),
+            user: reviewName.trim(),
+            rating: reviewRating,
+            date: 'Baru saja',
+            comment: reviewComment.trim(),
+            color: AVATAR_COLORS[Math.floor(Math.random() * AVATAR_COLORS.length)],
+        };
+        setReviews((prev) => [newReview, ...prev]);
+        setReviewName('');
+        setReviewRating(0);
+        setReviewComment('');
+        setReviewErrors({});
+        setShowToast(true);
+    };
+
+    const displayRating = hoverRating || reviewRating;
 
     return (
         <div className="min-h-screen bg-neutral-light flex flex-col">
@@ -91,7 +143,7 @@ export default function ProductShow() {
                                         <h1 className="text-lg font-semibold text-neutral-dark mb-2 leading-snug">{MOCK_PRODUCT.title}</h1>
 
                                         <div className="flex items-center gap-3 mb-3">
-                                            <StarRating rating={MOCK_PRODUCT.rating} count={MOCK_PRODUCT.reviewCount} />
+                                            <StarRating rating={avgRating} count={reviews.length} />
                                             <span className="text-xs text-neutral-medium">|</span>
                                             <span className="text-xs text-neutral-medium">{MOCK_PRODUCT.sold.toLocaleString()} terjual</span>
                                         </div>
@@ -128,36 +180,47 @@ export default function ProductShow() {
                                 <p className="text-sm text-neutral-medium leading-relaxed">{MOCK_PRODUCT.description}</p>
                             </div>
 
-                            {/* Reviews */}
+                            {/* Reviews Section */}
                             <div className="bg-white rounded-xl border border-border p-5">
-                                <h2 className="font-semibold text-neutral-dark mb-4">Ulasan Pembeli ({MOCK_PRODUCT.reviewCount.toLocaleString()})</h2>
+                                <h2 className="font-semibold text-neutral-dark mb-4">Ulasan Pembeli ({reviews.length})</h2>
                                 <div className="flex items-center gap-4 mb-5 p-4 bg-neutral-light rounded-xl">
                                     <div className="text-center">
-                                        <p className="text-4xl font-bold text-neutral-dark">{MOCK_PRODUCT.rating}</p>
-                                        <StarRating rating={MOCK_PRODUCT.rating} className="justify-center mt-1" />
+                                        <p className="text-4xl font-bold text-neutral-dark">{avgRating}</p>
+                                        <StarRating rating={avgRating} className="justify-center mt-1" />
                                     </div>
                                     <div className="flex-1 space-y-1">
-                                        {[5, 4, 3, 2, 1].map((r) => (
-                                            <div key={r} className="flex items-center gap-2">
-                                                <span className="text-xs text-neutral-medium w-4">{r}</span>
-                                                <div className="flex-1 h-1.5 bg-border rounded-full overflow-hidden">
-                                                    <div className="h-full bg-yellow-400 rounded-full" style={{ width: `${r === 5 ? 70 : r === 4 ? 20 : 5}%` }} />
+                                        {[5, 4, 3, 2, 1].map((r) => {
+                                            const count = reviews.filter(rv => rv.rating === r).length;
+                                            const pct = reviews.length ? Math.round((count / reviews.length) * 100) : 0;
+                                            return (
+                                                <div key={r} className="flex items-center gap-2">
+                                                    <span className="text-xs text-neutral-medium w-4">{r}</span>
+                                                    <div className="flex-1 h-1.5 bg-border rounded-full overflow-hidden">
+                                                        <div className="h-full bg-yellow-400 rounded-full" style={{ width: `${pct}%` }} />
+                                                    </div>
+                                                    <span className="text-[10px] text-neutral-medium w-6">{count}</span>
                                                 </div>
-                                            </div>
-                                        ))}
+                                            );
+                                        })}
                                     </div>
                                 </div>
-                                <div className="space-y-4">
-                                    {REVIEWS.map((r) => (
+
+                                {/* Reviews List */}
+                                <div className="space-y-4 mb-6">
+                                    {reviews.map((r) => (
                                         <div key={r.id} className="border-b border-border pb-4 last:border-0">
                                             <div className="flex items-center gap-3 mb-2">
-                                                <div className="w-8 h-8 rounded-full bg-primary-light text-primary flex items-center justify-center text-xs font-bold">
-                                                    {r.user[0]}
+                                                <div className={`w-8 h-8 rounded-full ${r.color} text-white flex items-center justify-center text-xs font-bold`}>
+                                                    {r.user.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()}
                                                 </div>
                                                 <div>
                                                     <p className="text-sm font-medium text-neutral-dark">{r.user}</p>
                                                     <div className="flex items-center gap-2">
-                                                        <StarRating rating={r.rating} />
+                                                        <div className="flex gap-0.5">
+                                                            {Array.from({ length: 5 }, (_, i) => (
+                                                                <span key={i} className={`text-xs ${i < r.rating ? 'text-yellow-400' : 'text-gray-300'}`}>★</span>
+                                                            ))}
+                                                        </div>
                                                         <span className="text-xs text-neutral-medium">{r.date}</span>
                                                     </div>
                                                 </div>
@@ -165,6 +228,64 @@ export default function ProductShow() {
                                             <p className="text-sm text-neutral-medium ml-11">{r.comment}</p>
                                         </div>
                                     ))}
+                                </div>
+
+                                {/* Product Review Form */}
+                                <div className="border-t border-border pt-5">
+                                    <h3 className="font-semibold text-neutral-dark mb-3">✍️ Tulis Ulasan Produk</h3>
+                                    <form onSubmit={handleReviewSubmit} className="space-y-4">
+                                        <div>
+                                            <label className="block text-sm font-medium text-neutral-dark mb-1.5">Nama</label>
+                                            <input
+                                                type="text"
+                                                value={reviewName}
+                                                onChange={e => setReviewName(e.target.value)}
+                                                placeholder="Nama kamu"
+                                                className={`w-full border rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 transition-colors ${reviewErrors.name ? 'border-danger focus:ring-danger/30' : 'border-border focus:ring-primary/30 focus:border-primary'}`}
+                                            />
+                                            {reviewErrors.name && <p className="text-xs text-danger mt-1">{reviewErrors.name}</p>}
+                                        </div>
+
+                                        <div>
+                                            <label className="block text-sm font-medium text-neutral-dark mb-1.5">Rating</label>
+                                            <div className="flex items-center gap-1">
+                                                {[1, 2, 3, 4, 5].map((star) => (
+                                                    <button key={star} type="button"
+                                                        onClick={() => setReviewRating(star)}
+                                                        onMouseEnter={() => setHoverRating(star)}
+                                                        onMouseLeave={() => setHoverRating(0)}
+                                                        className="text-2xl transition-transform hover:scale-110 focus:outline-none">
+                                                        {star <= displayRating ? '⭐' : '☆'}
+                                                    </button>
+                                                ))}
+                                                {displayRating > 0 && (
+                                                    <span className={`text-sm font-medium ml-2 ${displayRating >= 4 ? 'text-primary' : displayRating >= 3 ? 'text-amber-500' : 'text-danger'}`}>
+                                                        {RATING_LABELS[displayRating]}
+                                                    </span>
+                                                )}
+                                            </div>
+                                            {reviewErrors.rating && <p className="text-xs text-danger mt-1">{reviewErrors.rating}</p>}
+                                        </div>
+
+                                        <div>
+                                            <label className="block text-sm font-medium text-neutral-dark mb-1.5">Komentar</label>
+                                            <div className="relative">
+                                                <textarea
+                                                    value={reviewComment}
+                                                    onChange={e => setReviewComment(e.target.value)}
+                                                    placeholder="Ceritakan pengalamanmu..."
+                                                    rows={3}
+                                                    className={`w-full border rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 resize-none transition-colors ${reviewErrors.comment ? 'border-danger focus:ring-danger/30' : 'border-border focus:ring-primary/30 focus:border-primary'}`}
+                                                />
+                                                <span className={`absolute bottom-2 right-3 text-[10px] ${reviewComment.length < 20 ? 'text-neutral-medium' : 'text-primary'}`}>
+                                                    {reviewComment.length}/20 min
+                                                </span>
+                                            </div>
+                                            {reviewErrors.comment && <p className="text-xs text-danger mt-1">{reviewErrors.comment}</p>}
+                                        </div>
+
+                                        <Button type="submit" size="md">Kirim Ulasan Produk</Button>
+                                    </form>
                                 </div>
                             </div>
                         </div>
@@ -189,10 +310,10 @@ export default function ProductShow() {
                                 </div>
 
                                 <div className="space-y-2">
-                                    <Link href="/buyer/cart">
+                                    <Link href="/dashboard/buyer/cart">
                                         <Button variant="outline" size="md" className="w-full justify-center">+ Keranjang</Button>
                                     </Link>
-                                    <Link href="/buyer/checkout">
+                                    <Link href="/dashboard/buyer/checkout">
                                         <Button variant="primary" size="md" className="w-full justify-center">Beli Sekarang</Button>
                                     </Link>
                                 </div>
@@ -226,6 +347,7 @@ export default function ProductShow() {
                 </Container>
             </main>
             <Footer />
+            <Toast message="Ulasan produk berhasil dikirim! Terima kasih 🎉" show={showToast} onClose={() => setShowToast(false)} />
         </div>
     );
 }
