@@ -3,6 +3,7 @@
     "type": "module",
     "scripts": {
         "build": "vite build",
+        "vercel-build": "echo 'Using pre-built assets'",
         "dev": "vite"
     },
     "devDependencies": {
