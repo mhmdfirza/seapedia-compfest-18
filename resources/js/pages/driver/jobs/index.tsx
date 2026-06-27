@@ -11,12 +11,12 @@ const MENU_ITEMS: MenuItem[] = [
 ];
 const USER = { name: 'Arif Kurniawan', email: 'arif@email.com', roles: ['driver' as const] };
 
-export default function DriverHistory() {
+export default function DriverJobs() {
     return (
         <DashboardPlaceholderPage
-            role="driver" user={USER} menuItems={MENU_ITEMS} activePath="/dashboard/driver/history"
-            title="Riwayat Pekerjaan"
-            icon="📜"
+            role="driver" user={USER} menuItems={MENU_ITEMS} activePath="/dashboard/driver/jobs"
+            title="Peta Pekerjaan"
+            icon="🔍"
         />
     );
 }
