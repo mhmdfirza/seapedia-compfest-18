@@ -5,24 +5,9 @@
         {
             "src": "api/index.php",
             "use": "vercel-php@0.6.2"
-        },
-        {
-            "src": "package.json",
-            "use": "@vercel/static-build",
-            "config": {
-                "distDir": "public"
-            }
         }
     ],
     "routes": [
-        {
-            "src": "/",
-            "dest": "/api/index.php"
-        },
-        {
-            "src": "/index\\.php",
-            "dest": "/api/index.php"
-        },
         {
             "handle": "filesystem"
         },

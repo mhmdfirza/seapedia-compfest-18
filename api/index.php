@@ -3,17 +3,22 @@ use Illuminate\Http\Request;
 
 define('LARAVEL_START', microtime(true));
 
-// Setup environment for Vercel Serverless Function (Read-Only Filesystem)
+// ── Vercel Serverless: Force HTTPS URL generation ──────────────────────────
+// Vercel terminates SSL at the edge. PHP sees HTTP, but all public URLs must
+// be HTTPS. We force the SERVER vars so Laravel/Vite generate https:// links.
+$_SERVER['HTTPS'] = 'on';
+$_SERVER['SERVER_PORT'] = 443;
+
+// ── Vercel Serverless: Redirect writable paths to /tmp ─────────────────────
 $_SERVER['LARAVEL_STORAGE_PATH'] = '/tmp/storage';
 
-// Ensure required tmp directories exist
 $directories = [
     '/tmp/storage/framework/views',
     '/tmp/storage/framework/cache',
     '/tmp/storage/framework/cache/data',
     '/tmp/storage/framework/sessions',
     '/tmp/storage/logs',
-    '/tmp/bootstrap/cache'
+    '/tmp/bootstrap/cache',
 ];
 
 foreach ($directories as $dir) {
