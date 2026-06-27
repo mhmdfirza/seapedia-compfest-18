@@ -10,6 +10,11 @@ export default defineConfig({
         }),
         react(),
     ],
+    resolve: {
+        alias: {
+            'res': '/resources/js',
+        },
+    },
 
     // ── Docker HMR Configuration ───────────────────────────────────────
     // Vite runs inside the 'node' container but the browser runs on the

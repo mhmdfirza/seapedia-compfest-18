@@ -66,7 +66,7 @@ export default function Welcome() {
                             </div>
                         }
                     />
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
                         {FLASH_SALE_PRODUCTS.map((p) => (
                             <ProductCard key={p.id} {...p} />
                         ))}
@@ -82,7 +82,7 @@ export default function Welcome() {
                         subtitle="Dipilih oleh ribuan pelanggan puas"
                         action={<Link href="/products" className="text-primary text-sm font-medium hover:underline">Lihat Semua →</Link>}
                     />
-                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
                         {FEATURED_PRODUCTS.map((p) => (
                             <ProductCard key={p.id} {...p} />
                         ))}

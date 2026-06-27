@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Head, Link } from '@inertiajs/react';
+import { Head, Link, usePage } from '@inertiajs/react';
 import Navbar from 'res/components/sections/navbar';
 import Footer from 'res/components/sections/footer';
 import Container from 'res/components/ui/container';
@@ -57,6 +57,9 @@ function formatPrice(price: number) {
 }
 
 export default function ProductShow() {
+    const page = usePage<any>();
+    const authUser = page.props.auth?.user ?? null;
+
     const [selectedImage, setSelectedImage] = useState(0);
     const [quantity, setQuantity] = useState(1);
     const [reviews, setReviews] = useState<ProductReview[]>(INITIAL_REVIEWS);
@@ -309,14 +312,28 @@ export default function ProductShow() {
                                     <span className="font-bold text-neutral-dark">{formatPrice(MOCK_PRODUCT.price * quantity)}</span>
                                 </div>
 
-                                <div className="space-y-2">
-                                    <Link href="/dashboard/buyer/cart">
-                                        <Button variant="outline" size="md" className="w-full justify-center">+ Keranjang</Button>
-                                    </Link>
-                                    <Link href="/dashboard/buyer/checkout">
-                                        <Button variant="primary" size="md" className="w-full justify-center">Beli Sekarang</Button>
-                                    </Link>
-                                </div>
+                                {authUser ? (
+                                    <div className="space-y-2">
+                                        {authUser.role !== 'buyer' ? (
+                                            <p className="text-sm text-amber-600 bg-amber-50 p-2 rounded text-center mb-2">Gunakan akun Buyer untuk membeli produk.</p>
+                                        ) : (
+                                            <>
+                                                <Link href="/dashboard/buyer/cart">
+                                                    <Button variant="outline" size="md" className="w-full justify-center text-sm">+ Keranjang</Button>
+                                                </Link>
+                                                <Link href="/dashboard/buyer/checkout">
+                                                    <Button variant="primary" size="md" className="w-full justify-center text-sm">Beli Sekarang</Button>
+                                                </Link>
+                                            </>
+                                        )}
+                                    </div>
+                                ) : (
+                                    <div className="space-y-2">
+                                        <Link href="/login" className="block">
+                                            <Button variant="primary" size="md" className="w-full justify-center text-sm">Masuk untuk Beli</Button>
+                                        </Link>
+                                    </div>
+                                )}
                             </div>
 
                             {/* Seller info */}

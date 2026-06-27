@@ -3,6 +3,7 @@ import { Link, usePage } from '@inertiajs/react';
 import Container from 'res/components/ui/container';
 import Logo from 'res/components/ui/logo';
 import Button from 'res/components/ui/button';
+import BottomNav from 'res/components/sections/bottom-nav';
 
 // Icons as inline SVG for zero deps
 const SearchIcon = () => (
@@ -39,10 +40,12 @@ export default function Navbar() {
     const [userDropdownOpen, setUserDropdownOpen] = useState(false);
 
     // Try to get auth user from Inertia page props; fallback to null
-    let authUser: { name?: string; role?: string } | null = null;
+    let authUser: any = null;
+    let urlPath = '/';
     try {
-        const page = usePage<{ auth?: { user?: { name: string; role: string } } }>();
+        const page = usePage<any>();
         authUser = page.props.auth?.user ?? null;
+        urlPath = page.url ?? '/';
     } catch { /* noop */ }
 
     return (
@@ -77,56 +80,52 @@ export default function Navbar() {
                     <div className="flex items-center gap-2 ml-auto">
                         {authUser ? (
                             <>
-                                {/* Cart */}
-                                <Link href="/dashboard/buyer/cart" className="relative p-2 text-neutral-dark hover:text-primary transition-colors">
-                                    <CartIcon />
-                                    <span className="absolute -top-0.5 -right-0.5 bg-secondary text-white text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center">3</span>
-                                </Link>
                                 {/* Bell */}
                                 <button className="relative p-2 text-neutral-dark hover:text-primary transition-colors">
                                     <BellIcon />
                                     <span className="absolute -top-0.5 -right-0.5 bg-danger text-white text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center">2</span>
                                 </button>
+                                {/* Cart (Buyer only) */}
+                                {authUser.role === 'buyer' && (
+                                    <Link href="/dashboard/buyer/cart" className="relative p-2 text-neutral-dark hover:text-primary transition-colors mr-2">
+                                        <CartIcon />
+                                        <span className="absolute -top-0.5 -right-0.5 bg-secondary text-white text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center">3</span>
+                                    </Link>
+                                )}
                                 {/* User Dropdown */}
                                 <div className="relative">
                                     <button
                                         onClick={() => setUserDropdownOpen(v => !v)}
                                         className="flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-neutral-light transition-colors text-sm font-medium text-neutral-dark"
                                     >
-                                        <div className="w-7 h-7 rounded-full bg-primary-light flex items-center justify-center text-primary font-bold text-xs flex-shrink-0">
+                                        <div className="w-8 h-8 rounded-full bg-primary-light flex items-center justify-center text-primary font-bold text-sm flex-shrink-0">
                                             {authUser.name?.[0]?.toUpperCase() ?? 'U'}
                                         </div>
                                         <span className="hidden lg:block max-w-[100px] truncate">{authUser.name}</span>
                                         <ChevronDownIcon />
                                     </button>
                                     {userDropdownOpen && (
-                                        <div className="absolute right-0 mt-2 w-48 rounded-xl border border-border bg-white shadow-md py-1 z-50">
-                                            {authUser.role === 'buyer' && (
-                                                <>
-                                                    <Link href="/dashboard/buyer" className="block px-4 py-2 text-sm text-neutral-dark hover:bg-neutral-light">Dashboard</Link>
-                                                    <Link href="/dashboard/buyer/orders" className="block px-4 py-2 text-sm text-neutral-dark hover:bg-neutral-light">Pesanan Saya</Link>
-                                                    <Link href="/dashboard/buyer/wallet" className="block px-4 py-2 text-sm text-neutral-dark hover:bg-neutral-light">Dompet</Link>
-                                                </>
+                                        <div className="absolute right-0 mt-2 w-64 rounded-xl border border-border bg-white shadow-lg py-2 z-50">
+                                            {/* Header with info */}
+                                            <div className="px-4 py-2 border-b border-border mb-1">
+                                                <p className="font-semibold text-neutral-dark truncate">{authUser.name}</p>
+                                                <p className="text-xs text-neutral-medium truncate mb-2">{authUser.email || 'user@example.com'}</p>
+                                                <span className="inline-block px-2 py-0.5 bg-primary-light text-primary text-[10px] font-bold rounded-full uppercase tracking-wider">
+                                                    {authUser.role}
+                                                </span>
+                                            </div>
+
+                                            {/* Links */}
+                                            <Link href="/profile" className="block px-4 py-2 text-sm text-neutral-dark hover:bg-neutral-light">Profil Saya</Link>
+                                            <Link href={`/dashboard/${authUser.role}`} className="block px-4 py-2 text-sm text-neutral-dark hover:bg-neutral-light">Dashboard</Link>
+
+                                            {/* Multi Role Switch */}
+                                            {authUser.roles && authUser.roles.length > 1 && (
+                                                <Link href="/select-role" className="block px-4 py-2 text-sm text-neutral-dark hover:bg-neutral-light">Ganti Peran</Link>
                                             )}
-                                            {authUser.role === 'seller' && (
-                                                <>
-                                                    <Link href="/dashboard/seller" className="block px-4 py-2 text-sm text-neutral-dark hover:bg-neutral-light">Dashboard Toko</Link>
-                                                    <Link href="/seller/products" className="block px-4 py-2 text-sm text-neutral-dark hover:bg-neutral-light">Kelola Produk</Link>
-                                                    <Link href="/seller/orders" className="block px-4 py-2 text-sm text-neutral-dark hover:bg-neutral-light">Pesanan Masuk</Link>
-                                                </>
-                                            )}
-                                            {authUser.role === 'driver' && (
-                                                <>
-                                                    <Link href="/dashboard/driver" className="block px-4 py-2 text-sm text-neutral-dark hover:bg-neutral-light">Dashboard Driver</Link>
-                                                    <Link href="/driver/jobs" className="block px-4 py-2 text-sm text-neutral-dark hover:bg-neutral-light">Daftar Pengiriman</Link>
-                                                    <Link href="/driver/earnings" className="block px-4 py-2 text-sm text-neutral-dark hover:bg-neutral-light">Penghasilan</Link>
-                                                </>
-                                            )}
-                                            {authUser.role === 'admin' && (
-                                                <Link href="/admin/dashboard" className="block px-4 py-2 text-sm text-neutral-dark hover:bg-neutral-light">Panel Admin</Link>
-                                            )}
+
                                             <hr className="my-1 border-border" />
-                                            <Link href="/logout" method="post" as="button" className="w-full text-left block px-4 py-2 text-sm text-danger hover:bg-neutral-light">Keluar</Link>
+                                            <Link href="/logout" method="post" as="button" className="w-full text-left block px-4 py-2 text-sm text-danger hover:bg-red-50 font-medium">Keluar</Link>
                                         </div>
                                     )}
                                 </div>
@@ -187,6 +186,7 @@ export default function Navbar() {
                     ))}
                 </div>
             )}
+            <BottomNav authUser={authUser} currentPath={urlPath} />
         </header>
     );
 }
