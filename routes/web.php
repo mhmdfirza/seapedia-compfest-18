@@ -2,6 +2,8 @@
 
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
+use App\Http\Controllers\Web\AuthController;
+use App\Http\Controllers\Web\RoleController;
 
 // ─── Public Routes ───────────────────────────────────────────────────────────
 
@@ -12,8 +14,13 @@ Route::get('/products', fn() => Inertia::render('products/index'));
 Route::get('/products/{id}', fn($id) => Inertia::render('products/show', ['id' => $id]));
 
 Route::get('/login', fn() => Inertia::render('auth/login'));
+Route::post('/login', [AuthController::class, 'login']);
 
 Route::get('/register', fn() => Inertia::render('auth/register'));
+Route::post('/register', [AuthController::class, 'register']);
+
+Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth');
+Route::post('/switch-role', [RoleController::class, 'switchRole'])->middleware('auth');
 
 // Hanya untuk user yang sudah login tapi belum memilih role (proteksi via React)
 Route::get('/select-role', fn() => Inertia::render('auth/roleselection'));
