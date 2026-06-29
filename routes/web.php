@@ -1,82 +1,49 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use Inertia\Inertia;
-use App\Http\Controllers\Web\AuthController;
-use App\Http\Controllers\Web\RoleController;
+use App\Http\Controllers\Auth\AuthController;
+use App\Http\Controllers\Auth\RoleController;
+use App\Http\Controllers\Dashboard\BuyerDashboardController;
+use App\Http\Controllers\Dashboard\SellerDashboardController;
+use App\Http\Controllers\Dashboard\DriverDashboardController;
+use App\Http\Controllers\Dashboard\AdminDashboardController;
+use App\Http\Controllers\ProfileController;
 
-// ─── Public Routes ───────────────────────────────────────────────────────────
+Route::get('/', [\App\Http\Controllers\HomeController::class, 'index'])->name('home');
+Route::get('/products', [\App\Http\Controllers\ProductController::class, 'index'])->name('products.index');
+Route::get('/products/{id}', [\App\Http\Controllers\ProductController::class, 'show'])->name('products.show');
 
-Route::get('/', fn() => Inertia::render('welcome'));
-
-Route::get('/products', fn() => Inertia::render('products/index'));
-
-Route::get('/products/{id}', fn($id) => Inertia::render('products/show', ['id' => $id]));
-
-Route::get('/login', fn() => Inertia::render('auth/login'));
-Route::post('/login', [AuthController::class, 'login']);
-
-Route::get('/register', fn() => Inertia::render('auth/register'));
-Route::post('/register', [AuthController::class, 'register']);
-
-Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth');
-Route::post('/switch-role', [RoleController::class, 'switchRole'])->middleware('auth');
-
-// Hanya untuk user yang sudah login tapi belum memilih role (proteksi via React)
-Route::get('/select-role', fn() => Inertia::render('auth/roleselection'));
-
-// ─── Error Pages ─────────────────────────────────────────────────────────────
-
-Route::get('/404', fn() => Inertia::render('errors/not-found'));
-Route::get('/403', fn() => Inertia::render('errors/unauthorized'));
-
-// ─── Buyer Dashboard (/dashboard/buyer/*) ────────────────────────────────────
-
-Route::prefix('dashboard/buyer')->group(function () {
-    Route::get('/', fn() => Inertia::render('buyer/dashboard'));
-    Route::get('/profile', fn() => Inertia::render('buyer/profile'));
-    Route::get('/wallet', fn() => Inertia::render('buyer/wallet/index'));
-    Route::get('/address', fn() => Inertia::render('buyer/address/index'));
-    Route::get('/cart', fn() => Inertia::render('buyer/cart/index'));
-    Route::get('/orders', fn() => Inertia::render('buyer/orders/index'));
-    Route::get('/orders/{id}', fn($id) => Inertia::render('buyer/orders/show', ['id' => $id]));
+Route::middleware('guest')->group(function () {
+    Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
+    Route::post('/login', [AuthController::class, 'login']);
+    
+    Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
+    Route::post('/register', [AuthController::class, 'register']);
 });
 
-// ─── Seller Dashboard (/dashboard/seller/*) ──────────────────────────────────
+Route::middleware('auth')->group(function () {
+    Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+    
+    Route::get('/select-role', [RoleController::class, 'showSelectRole'])->name('select-role');
+    Route::post('/select-role', [RoleController::class, 'selectRole'])->name('select-role.store');
+    Route::post('/switch-role', [RoleController::class, 'switchRole'])->name('switch-role');
 
-Route::prefix('dashboard/seller')->group(function () {
-    Route::get('/', fn() => Inertia::render('seller/dashboard'));
-    Route::get('/profile', fn() => Inertia::render('seller/profile'));
-    Route::get('/products', fn() => Inertia::render('seller/products/index'));
-    Route::get('/products/new', fn() => Inertia::render('seller/products/create'));
-    Route::get('/orders', fn() => Inertia::render('seller/orders/index'));
-    Route::get('/income', fn() => Inertia::render('seller/income'));
+    Route::prefix('dashboard/buyer')->name('dashboard.buyer.')->middleware([\App\Http\Middleware\EnsureRoleIsSelected::class, \App\Http\Middleware\EnsureActiveRole::class . ':buyer'])->group(function () {
+        Route::get('/', [BuyerDashboardController::class, 'index'])->name('index');
+        Route::get('/profile', [ProfileController::class, 'show'])->name('profile');
+    });
+
+    Route::prefix('dashboard/seller')->name('dashboard.seller.')->middleware([\App\Http\Middleware\EnsureRoleIsSelected::class, \App\Http\Middleware\EnsureActiveRole::class . ':seller'])->group(function () {
+        Route::get('/', [SellerDashboardController::class, 'index'])->name('index');
+        Route::get('/profile', [ProfileController::class, 'show'])->name('profile');
+    });
+
+    Route::prefix('dashboard/driver')->name('dashboard.driver.')->middleware([\App\Http\Middleware\EnsureRoleIsSelected::class, \App\Http\Middleware\EnsureActiveRole::class . ':driver'])->group(function () {
+        Route::get('/', [DriverDashboardController::class, 'index'])->name('index');
+        Route::get('/profile', [ProfileController::class, 'show'])->name('profile');
+    });
+
+    Route::prefix('dashboard/admin')->name('dashboard.admin.')->middleware([\App\Http\Middleware\EnsureActiveRole::class . ':admin'])->group(function () {
+        Route::get('/', [AdminDashboardController::class, 'index'])->name('index');
+    });
 });
-
-// ─── Driver Dashboard (/dashboard/driver/*) ──────────────────────────────────
-
-Route::prefix('dashboard/driver')->group(function () {
-    Route::get('/', fn() => Inertia::render('driver/dashboard'));
-    Route::get('/profile', fn() => Inertia::render('driver/profile'));
-    Route::get('/jobs', fn() => Inertia::render('driver/jobs/index'));
-    Route::get('/active-job', fn() => Inertia::render('driver/active-job'));
-    Route::get('/history', fn() => Inertia::render('driver/history'));
-    Route::get('/earnings', fn() => Inertia::render('driver/earnings/index'));
-});
-
-// ─── Admin Dashboard (/dashboard/admin/*) ────────────────────────────────────
-
-Route::prefix('dashboard/admin')->group(function () {
-    Route::get('/', fn() => Inertia::render('admin/dashboard'));
-    Route::get('/users', fn() => Inertia::render('admin/users/index'));
-    Route::get('/stores', fn() => Inertia::render('admin/stores/index'));
-    Route::get('/products', fn() => Inertia::render('admin/products/index'));
-    Route::get('/orders', fn() => Inertia::render('admin/orders/index'));
-    Route::get('/vouchers', fn() => Inertia::render('admin/vouchers/index'));
-    Route::get('/promos', fn() => Inertia::render('admin/promos/index'));
-    Route::get('/deliveries', fn() => Inertia::render('admin/deliveries/index'));
-});
-
-// ─── Fallback (404) ──────────────────────────────────────────────────────────
-
-Route::fallback(fn() => Inertia::render('errors/not-found'));

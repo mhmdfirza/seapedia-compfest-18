@@ -5,94 +5,141 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
 use App\Http\Requests\Auth\RegisterRequest;
-use App\Models\Role;
-use App\Models\Store;
-use App\Models\User;
-use App\Models\UserActiveRole;
-use Illuminate\Http\JsonResponse;
+use App\Services\AuthService;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
-use OpenApi\Attributes as OA;
+use App\Models\Role;
 
+/**
+ * @OA\Info(
+ *      version="1.0.0",
+ *      title="SEAPEDIA API"
+ * )
+ * @OA\Server(
+ *      url=L5_SWAGGER_CONST_HOST,
+ * )
+ * @OA\SecurityScheme(
+ *     type="http",
+ *     scheme="bearer",
+ *     securityScheme="BearerAuth",
+ *     bearerFormat="JWT"
+ * )
+ */
 class AuthController extends Controller
 {
-    /**
-     * Handle an incoming API registration request.
-     */
-    #[OA\Get(path: '/api/auth/me', description: 'Get authenticated user context', tags: ['Auth'])]
-    #[OA\Response(response: 200, description: 'Success')]
-    public function register(RegisterRequest $request): JsonResponse
+    public function __construct(protected AuthService $authService)
     {
-        $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'phone' => $request->phone,
-            'password' => Hash::make($request->password),
+    }
+
+    /**
+     * @OA\Post(
+     *     path="/api/v1/auth/register",
+     *     summary="Register a new user",
+     *     @OA\RequestBody(
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="name", type="string"),
+     *             @OA\Property(property="email", type="string"),
+     *             @OA\Property(property="password", type="string"),
+     *             @OA\Property(property="password_confirmation", type="string"),
+     *             @OA\Property(property="phone", type="string"),
+     *             @OA\Property(property="roles", type="array", @OA\Items(type="string")),
+     *             @OA\Property(property="store_name", type="string")
+     *         )
+     *     ),
+     *     @OA\Response(response=200, description="Successful registration")
+     * )
+     */
+    public function register(RegisterRequest $request)
+    {
+        $user = $this->authService->register($request->validated());
+        
+        $token = $user->createToken('seapedia-api-token')->plainTextToken;
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'access_token' => $token,
+                'token_type' => 'Bearer',
+                'user' => $user->load('roles', 'activeRoleRecord')
+            ]
         ]);
+    }
 
-        $role = Role::where('name', $request->role)->firstOrFail();
-        $user->roles()->attach($role);
+    /**
+     * @OA\Post(
+     *     path="/api/v1/auth/login",
+     *     summary="Login user",
+     *     @OA\RequestBody(
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="email", type="string"),
+     *             @OA\Property(property="password", type="string")
+     *         )
+     *     ),
+     *     @OA\Response(response=200, description="Successful login")
+     * )
+     */
+    public function login(LoginRequest $request)
+    {
+        if (Auth::attempt($request->only('email', 'password'))) {
+            $user = Auth::user();
+            
+            if (!$user->isAdmin() && !$user->hasMultipleNonAdminRoles()) {
+                $singleRole = $user->roles->where('name', '!=', Role::ADMIN)->first();
+                if ($singleRole) {
+                    $this->authService->setActiveRole($user, $singleRole->name);
+                }
+            }
 
-        UserActiveRole::create([
-            'user_id' => $user->id,
-            'active_role' => $role->name,
-        ]);
+            $token = $user->createToken('seapedia-api-token')->plainTextToken;
 
-        if ($role->name === 'seller' && $request->filled('store_name')) {
-            Store::create([
-                'user_id' => $user->id,
-                'name' => $request->store_name,
+            return response()->json([
+                'success' => true,
+                'data' => [
+                    'access_token' => $token,
+                    'token_type' => 'Bearer',
+                    'user' => $user->load('roles', 'activeRoleRecord')
+                ]
             ]);
         }
 
-        $token = $user->createToken('api-token')->plainTextToken;
-
-        return response()->json([
-            'message' => 'Registration successful',
-            'user' => $user->load(['roles', 'activeRole', 'store']),
-            'token' => $token,
-        ], 201);
+        return response()->json(['error' => 'Unauthorized'], 401);
     }
 
     /**
-     * Handle an incoming API authentication request.
+     * @OA\Post(
+     *     path="/api/v1/auth/logout",
+     *     summary="Logout user",
+     *     security={{"BearerAuth":{}}},
+     *     @OA\Response(response=200, description="Successful logout")
+     * )
      */
-    public function login(Request $request): JsonResponse
+    public function logout(Request $request)
     {
-        $request->validate([
-            'email' => 'required|email',
-            'password' => 'required',
-        ]);
-
-        $user = User::where('email', $request->email)->first();
-
-        if (! $user || ! Hash::check($request->password, $user->password)) {
-            return response()->json([
-                'message' => 'Invalid credentials.',
-            ], 401);
+        $token = $request->user()->currentAccessToken();
+        if ($token) {
+            $token->delete();
+        } else {
+            // fallback if currentAccessToken is null (mostly for tests if state is cached incorrectly)
+            $request->user()->tokens()->delete();
         }
 
-        // Revoke existing tokens if you want single device login, or just create new one
-        $user->tokens()->delete();
-
-        $token = $user->createToken('api-token')->plainTextToken;
-
-        return response()->json([
-            'message' => 'Login successful',
-            'user' => $user->load(['roles', 'activeRole', 'store']),
-            'token' => $token,
-        ]);
+        return response()->json(['success' => true]);
     }
 
     /**
-     * Destroy an authenticated API session.
+     * @OA\Get(
+     *     path="/api/v1/auth/me",
+     *     summary="Get current user profile",
+     *     security={{"BearerAuth":{}}},
+     *     @OA\Response(response=200, description="User profile data")
+     * )
      */
-    public function logout(Request $request): JsonResponse
+    public function me(Request $request)
     {
-        $request->user()->currentAccessToken()->delete();
-
-        return response()->json([
-            'message' => 'Logged out successfully',
-        ]);
+        $user = $request->user()->load('roles', 'activeRoleRecord', 'store');
+        
+        return response()->json($user);
     }
 }

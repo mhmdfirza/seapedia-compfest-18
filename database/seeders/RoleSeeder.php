@@ -7,31 +7,28 @@ use App\Models\Role;
 
 class RoleSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
         $roles = [
             [
-                'name' => 'admin',
+                'name' => Role::ADMIN,
                 'display_name' => 'Administrator',
-                'description' => 'Super user with full access.',
+                'description' => 'pengelola sistem',
             ],
             [
-                'name' => 'seller',
+                'name' => Role::SELLER,
                 'display_name' => 'Penjual',
-                'description' => 'User who sells products.',
+                'description' => 'pengelola toko dan produk',
             ],
             [
-                'name' => 'buyer',
+                'name' => Role::BUYER,
                 'display_name' => 'Pembeli',
-                'description' => 'User who buys products.',
+                'description' => 'pelanggan marketplace',
             ],
             [
-                'name' => 'driver',
+                'name' => Role::DRIVER,
                 'display_name' => 'Pengirim',
-                'description' => 'User who delivers products.',
+                'description' => 'mitra pengiriman',
             ],
         ];
 

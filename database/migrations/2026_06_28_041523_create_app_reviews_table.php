@@ -20,10 +20,11 @@ return new class extends Migration
             $table->string('ip_address')->nullable();
             $table->timestamps();
             
-            // Check constraint will be added in native DB flavor or through logic.
-            // For Postgres, we can do a raw check constraint.
-            \DB::statement('ALTER TABLE app_reviews ADD CONSTRAINT rating_check CHECK (rating >= 1 AND rating <= 5)');
         });
+        
+        if (\DB::connection()->getDriverName() !== 'sqlite') {
+            \DB::statement('ALTER TABLE app_reviews ADD CONSTRAINT rating_check CHECK (rating >= 1 AND rating <= 5)');
+        }
     }
 
     /**

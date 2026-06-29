@@ -5,26 +5,23 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\RoleController;
 use App\Http\Controllers\Api\AppReviewController;
+use App\Http\Controllers\ProfileController;
 
-// Public Reviews API
-Route::get('/reviews', [AppReviewController::class, 'index']);
-Route::post('/reviews', [AppReviewController::class, 'store']);
-
-Route::prefix('auth')->group(function () {
-    Route::post('/register', [AuthController::class, 'register']);
-    Route::post('/login', [AuthController::class, 'login']);
+Route::prefix('v1')->name('api.v1.')->group(function () {
     
+    Route::post('/auth/login', [AuthController::class, 'login'])->name('auth.login');
+    Route::post('/auth/register', [AuthController::class, 'register'])->name('auth.register');
+    
+    Route::get('/app-reviews', [AppReviewController::class, 'index'])->name('app-reviews.index');
+    Route::post('/app-reviews', [AppReviewController::class, 'store'])->name('app-reviews.store');
+
     Route::middleware('auth:sanctum')->group(function () {
-        Route::post('/logout', [AuthController::class, 'logout']);
-        Route::get('/me', function (Request $request) {
-            return $request->user()->load(['roles', 'activeRole', 'store']);
-        });
+        Route::post('/auth/logout', [AuthController::class, 'logout'])->name('auth.logout');
+        Route::get('/auth/me', [AuthController::class, 'me'])->name('auth.me');
+        
+        Route::get('/roles', [RoleController::class, 'getRoles'])->name('roles.index');
+        Route::post('/roles/select', [RoleController::class, 'selectRole'])->name('roles.select');
+        
+        Route::get('/profile', [AuthController::class, 'me'])->name('profile');
     });
-});
-
-Route::middleware('auth:sanctum')->group(function () {
-    Route::post('/switch-role', [RoleController::class, 'switchRole']);
-    
-    // Example of a role-protected route
-    // Route::middleware('role:seller')->get('/seller/dashboard', function () { ... });
 });

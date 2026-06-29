@@ -3,36 +3,53 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\JsonResponse;
+use App\Http\Requests\Auth\SelectRoleRequest;
+use App\Services\AuthService;
 use Illuminate\Http\Request;
 
 class RoleController extends Controller
 {
-    /**
-     * Switch the active role of the authenticated user.
-     */
-    public function switchRole(Request $request): JsonResponse
+    public function __construct(protected AuthService $authService)
     {
-        $request->validate([
-            'role' => ['required', 'string', 'exists:roles,name'],
-        ]);
+    }
 
-        $user = $request->user();
-
-        if (! $user->roles()->where('name', $request->role)->exists()) {
-            return response()->json([
-                'message' => 'You do not have permission to switch to this role.',
-            ], 403);
-        }
-
-        $user->activeRole()->updateOrCreate(
-            ['user_id' => $user->id],
-            ['active_role' => $request->role]
-        );
+    /**
+     * @OA\Post(
+     *     path="/api/v1/roles/select",
+     *     summary="Select an active role",
+     *     security={{"BearerAuth":{}}},
+     *     @OA\RequestBody(
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="role", type="string")
+     *         )
+     *     ),
+     *     @OA\Response(response=200, description="Role activated")
+     * )
+     */
+    public function selectRole(SelectRoleRequest $request)
+    {
+        $role = $request->validated('role');
+        $this->authService->setActiveRole($request->user(), $role);
 
         return response()->json([
-            'message' => 'Active role switched successfully.',
-            'active_role' => $request->role,
+            'success' => true,
+            'active_role' => $role,
+        ]);
+    }
+
+    /**
+     * @OA\Get(
+     *     path="/api/v1/roles",
+     *     summary="Get user roles",
+     *     security={{"BearerAuth":{}}},
+     *     @OA\Response(response=200, description="User roles")
+     * )
+     */
+    public function getRoles(Request $request)
+    {
+        return response()->json([
+            'roles' => $request->user()->roles
         ]);
     }
 }

@@ -3,46 +3,50 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\AppReview;
-use Illuminate\Http\JsonResponse;
+use App\Http\Requests\Auth\AppReviewRequest;
+use App\Services\AppReviewService;
 use Illuminate\Http\Request;
 
 class AppReviewController extends Controller
 {
-    /**
-     * Display a listing of the application reviews.
-     */
-    public function index(): JsonResponse
+    public function __construct(protected AppReviewService $appReviewService)
     {
-        $reviews = AppReview::with('user:id,name,avatar,phone')
-            ->latest()
-            ->paginate(15);
-            
-        return response()->json($reviews);
     }
 
     /**
-     * Store a newly created application review.
+     * @OA\Get(
+     *     path="/api/v1/app-reviews",
+     *     summary="Get app reviews",
+     *     @OA\Response(response=200, description="App reviews lists")
+     * )
      */
-    public function store(Request $request): JsonResponse
+    public function index(Request $request)
     {
-        $request->validate([
-            'reviewer_name' => ['required', 'string', 'max:255'],
-            'rating' => ['required', 'integer', 'min:1', 'max:5'],
-            'comment' => ['required', 'string'],
-        ]);
+        return response()->json($this->appReviewService->getReviews($request->get('limit', 10)));
+    }
 
-        $review = AppReview::create([
-            'reviewer_name' => $request->reviewer_name,
-            'rating' => $request->rating,
-            'comment' => $request->comment,
-            'user_id' => auth('sanctum')->id(), // Works for both authenticated API calls or null if guest
-            'ip_address' => $request->ip(),
-        ]);
+    /**
+     * @OA\Post(
+     *     path="/api/v1/app-reviews",
+     *     summary="Create an app review",
+     *     @OA\RequestBody(
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="reviewer_name", type="string"),
+     *             @OA\Property(property="rating", type="integer"),
+     *             @OA\Property(property="comment", type="string")
+     *         )
+     *     ),
+     *     @OA\Response(response=201, description="Review created")
+     * )
+     */
+    public function store(AppReviewRequest $request)
+    {
+        $review = $this->appReviewService->createReview($request->validated(), $request->ip());
 
         return response()->json([
-            'message' => 'Review submitted successfully',
-            'review' => $review,
+            'success' => true,
+            'data' => $review
         ], 201);
     }
 }
