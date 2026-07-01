@@ -7,6 +7,10 @@
     "license": "MIT",
     "require": {
         "php": "^8.2",
+<<<<<<< HEAD
+=======
+        "darkaonline/l5-swagger": "^11.1",
+>>>>>>> dev-level6
         "inertiajs/inertia-laravel": "^3.1",
         "laravel/framework": "^11.31",
         "laravel/sanctum": "^4.0",

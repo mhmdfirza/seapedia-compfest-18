@@ -1,14 +1,25 @@
 {
     "version": 2,
+<<<<<<< HEAD
     "framework": null,
+=======
+>>>>>>> dev-level6
     "builds": [
         {
             "src": "api/index.php",
             "use": "vercel-php@0.6.2"
         },
         {
+<<<<<<< HEAD
             "src": "public/**",
             "use": "@vercel/static"
+=======
+            "src": "package.json",
+            "use": "@vercel/static-build",
+            "config": {
+                "distDir": "public"
+            }
+>>>>>>> dev-level6
         }
     ],
     "routes": [
@@ -17,6 +28,7 @@
             "dest": "/public/build/$1"
         },
         {
+<<<<<<< HEAD
             "src": "/favicon\\.ico",
             "dest": "/public/favicon.ico"
         },
@@ -25,6 +37,8 @@
             "dest": "/public/robots.txt"
         },
         {
+=======
+>>>>>>> dev-level6
             "src": "/(.*)",
             "dest": "/api/index.php"
         }

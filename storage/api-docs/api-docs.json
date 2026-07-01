@@ -1,0 +1,31 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "SEAPEDIA API",
+        "description": "API documentation for SEAPEDIA Backend",
+        "version": "1.0.0"
+    },
+    "paths": {
+        "/api/auth/me": {
+            "get": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Handle an incoming API registration request.",
+                "description": "Get authenticated user context",
+                "operationId": "52c2172abd9566d13714045bacbff88a",
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    }
+                }
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "Auth",
+            "description": "Auth"
+        }
+    ]
+}

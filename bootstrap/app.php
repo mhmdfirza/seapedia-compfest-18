@@ -15,6 +15,12 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->web(append: [
             \App\Http\Middleware\HandleInertiaRequests::class,
         ]);
+<<<<<<< HEAD
+=======
+        $middleware->alias([
+            'role' => \App\Http\Middleware\CheckRole::class,
+        ]);
+>>>>>>> dev-level6
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //
