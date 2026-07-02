@@ -16,12 +16,28 @@ return Application::configure(basePath: dirname(__DIR__))
             \App\Http\Middleware\HandleInertiaRequests::class,
         ]);
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
+=======
+        
+        $middleware->append(\App\Http\Middleware\SecurityHeadersMiddleware::class);
+
+>>>>>>> dev-level7
         $middleware->alias([
-            'role' => \App\Http\Middleware\CheckRole::class,
+            'role' => \App\Http\Middleware\EnsureActiveRole::class,
+            'role.selected' => \App\Http\Middleware\EnsureRoleSelected::class,
+            'role.ownership' => \App\Http\Middleware\ValidateActiveRoleOwnership::class,
         ]);
 >>>>>>> dev-level6
     })
     ->withExceptions(function (Exceptions $exceptions) {
-        //
+        $exceptions->render(function (\Illuminate\Validation\ValidationException $e, \Illuminate\Http\Request $request) {
+            if ($request->expectsJson() || $request->is('api/*')) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Validasi gagal',
+                    'errors' => $e->errors(),
+                ], 422);
+            }
+        });
     })->create();

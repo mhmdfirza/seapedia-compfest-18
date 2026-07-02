@@ -13,18 +13,26 @@ class RegisterRequest extends FormRequest
         return true;
     }
 
+    protected function prepareForValidation()
+    {
+        $this->merge([
+            'name' => \App\Helpers\SanitizationHelper::sanitizeText($this->name),
+            'store_name' => \App\Helpers\SanitizationHelper::sanitizeText($this->store_name),
+        ]);
+    }
+
     public function rules(): array
     {
         return [
             'name' => ['required', 'string', 'min:3', 'max:100'],
-            'email' => ['required', 'email', 'unique:users,email'],
-            'phone' => ['nullable', 'string', 'regex:/^(08|\+62)/', 'unique:users,phone'],
+            'email' => ['required', 'string', 'email:rfc,dns', 'max:255', 'unique:users,email'],
+            'phone' => ['nullable', 'string', 'regex:/^(\+62|62|0)8[1-9][0-9]{6,11}$/', 'max:15', 'unique:users,phone'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
             'roles' => ['required', 'array', 'min:1'],
             'roles.*' => [
                 'required',
                 'string',
-                Rule::in(Role::where('name', '!=', Role::ADMIN)->pluck('name')->toArray())
+                Rule::in(Role::nonAdmin()->pluck('name')->toArray())
             ],
             'store_name' => [Rule::requiredIf(fn () => in_array(Role::SELLER, $this->roles ?? [])), 'nullable', 'string', 'min:3', 'max:100', 'unique:stores,name'],
         ];

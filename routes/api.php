@@ -7,13 +7,15 @@ use App\Http\Controllers\Api\RoleController;
 use App\Http\Controllers\Api\AppReviewController;
 use App\Http\Controllers\ProfileController;
 
-Route::prefix('v1')->name('api.v1.')->group(function () {
+Route::prefix('v1')->name('api.v1.')->middleware('throttle:api')->group(function () {
     
-    Route::post('/auth/login', [AuthController::class, 'login'])->name('auth.login');
-    Route::post('/auth/register', [AuthController::class, 'register'])->name('auth.register');
+    Route::post('/auth/login', [AuthController::class, 'login'])->name('auth.login')->middleware('throttle:login');
+    Route::post('/auth/register', [AuthController::class, 'register'])->name('auth.register')->middleware('throttle:register');
     
-    Route::get('/app-reviews', [AppReviewController::class, 'index'])->name('app-reviews.index');
-    Route::post('/app-reviews', [AppReviewController::class, 'store'])->name('app-reviews.store');
+    Route::middleware('throttle:60,1')->group(function () {
+        Route::get('/app-reviews', [AppReviewController::class, 'index'])->name('app-reviews.index');
+        Route::post('/app-reviews', [AppReviewController::class, 'store'])->name('app-reviews.store')->middleware('throttle:review');
+    });
 
     Route::middleware('auth:sanctum')->group(function () {
         Route::post('/auth/logout', [AuthController::class, 'logout'])->name('auth.logout');

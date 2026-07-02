@@ -16,11 +16,11 @@ class DemoUserSeeder extends Seeder
     {
         $password = Hash::make('password123');
 
-        $roles = Role::whereIn('name', [
+        $roles = Role::query()->whereIn('name', [
             Role::SELLER,
             Role::BUYER,
             Role::DRIVER,
-        ])->get()->keyBy('name');
+        ], 'and', false)->get()->keyBy('name');
 
         // 1. Multi-role: Seller + Buyer
         $user1 = User::firstOrCreate(
