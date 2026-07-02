@@ -18,8 +18,23 @@ class SecurityHeadersMiddleware
             $response->header('X-Frame-Options', 'SAMEORIGIN');
             $response->header('X-XSS-Protection', '1; mode=block');
             $response->header('Referrer-Policy', 'strict-origin-when-cross-origin');
-            $response->header('Content-Security-Policy', "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:;");
+            // Construct Content Security Policy
+            $csp = "default-src 'self'; ";
+            $csp .= "img-src 'self' data: https: blob:; ";
+            $csp .= "font-src 'self' data: https://fonts.gstatic.com; ";
             
+            if (app()->environment('local')) {
+                // Allow Vite dev server and inline scripts/styles for React
+                $csp .= "script-src 'self' 'unsafe-inline' 'unsafe-eval' http://localhost:5173; ";
+                $csp .= "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com http://localhost:5173; ";
+                $csp .= "connect-src 'self' ws://localhost:5173 http://localhost:5173; ";
+            } else {
+                $csp .= "script-src 'self' 'unsafe-inline' 'unsafe-eval'; ";
+                $csp .= "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; ";
+                $csp .= "connect-src 'self'; ";
+            }
+            
+            $response->header('Content-Security-Policy', $csp);
             if ($request->is('api/*')) {
                 $response->header('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
             }

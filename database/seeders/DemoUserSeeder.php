@@ -20,7 +20,7 @@ class DemoUserSeeder extends Seeder
             Role::SELLER,
             Role::BUYER,
             Role::DRIVER,
-        ])->get()->keyBy('name');
+        ], 'and', false)->get()->keyBy('name');
 
         // 1. Multi-role: Seller + Buyer
         $user1 = User::firstOrCreate(
