@@ -32,7 +32,7 @@ class RegisterRequest extends FormRequest
             'roles.*' => [
                 'required',
                 'string',
-                Rule::in(Role::where('name', '!=', Role::ADMIN)->pluck('name')->toArray())
+                Rule::in(Role::nonAdmin()->pluck('name')->toArray())
             ],
             'store_name' => [Rule::requiredIf(fn () => in_array(Role::SELLER, $this->roles ?? [])), 'nullable', 'string', 'min:3', 'max:100', 'unique:stores,name'],
         ];

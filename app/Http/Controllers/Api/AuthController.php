@@ -120,9 +120,10 @@ class AuthController extends Controller
     public function logout(Request $request)
     {
         $user = $request->user();
+        /** @var \Laravel\Sanctum\PersonalAccessToken|null $token */
         $token = $user->currentAccessToken();
         
-        if ($token) {
+        if ($token && method_exists($token, 'delete')) {
             $token->delete();
         } else {
             $user->tokens()->delete();

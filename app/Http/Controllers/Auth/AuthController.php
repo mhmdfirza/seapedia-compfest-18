@@ -70,7 +70,7 @@ class AuthController extends Controller
 
     public function showRegister()
     {
-        $availableRoles = Role::where('name', '!=', Role::ADMIN)->get();
+        $availableRoles = Role::nonAdmin()->get();
         
         return Inertia::render('auth/register', [
             'availableRoles' => $availableRoles,
