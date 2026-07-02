@@ -40,7 +40,11 @@ class RoleController extends Controller
     public function selectRole(SelectRoleRequest $request)
     {
         $role = $request->validated('role');
-        $this->authService->setActiveRole(Auth::user(), $role);
+        $user = Auth::user();
+        $previousRoleRecord = $user->activeRoleRecord ? clone $user->activeRoleRecord : null;
+        $this->authService->setActiveRole($user, $role);
+        
+        \App\Services\SecurityLogService::logSuccessfulRoleSwitch($user->id, $previousRoleRecord->active_role ?? null, $role);
         
         return redirect()->route('dashboard.' . $role . '.index');
     }
@@ -48,7 +52,11 @@ class RoleController extends Controller
     public function switchRole(SelectRoleRequest $request)
     {
         $role = $request->validated('role');
-        $this->authService->setActiveRole(Auth::user(), $role);
+        $user = Auth::user();
+        $previousRoleRecord = $user->activeRoleRecord ? clone $user->activeRoleRecord : null;
+        $this->authService->setActiveRole($user, $role);
+        
+        \App\Services\SecurityLogService::logSuccessfulRoleSwitch($user->id, $previousRoleRecord->active_role ?? null, $role);
         
         return redirect()->route('dashboard.' . $role . '.index');
     }

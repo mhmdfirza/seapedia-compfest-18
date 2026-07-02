@@ -17,11 +17,7 @@ class SelectRoleRequest extends FormRequest
             'role' => [
                 'required',
                 'string',
-                function ($attribute, $value, $fail) {
-                    if (!auth()->check() || !auth()->user()->roles->contains('name', $value)) {
-                        $fail('Peran yang dipilih tidak valid atau tidak Anda miliki.');
-                    }
-                },
+                new \App\Rules\ValidRole,
             ],
         ];
     }

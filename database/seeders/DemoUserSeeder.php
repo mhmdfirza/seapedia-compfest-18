@@ -16,7 +16,7 @@ class DemoUserSeeder extends Seeder
     {
         $password = Hash::make('password123');
 
-        $roles = Role::whereIn('name', [
+        $roles = Role::query()->whereIn('name', [
             Role::SELLER,
             Role::BUYER,
             Role::DRIVER,

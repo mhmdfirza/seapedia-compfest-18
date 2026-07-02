@@ -104,6 +104,8 @@ class AuthController extends Controller
             ]);
         }
 
+        \App\Services\SecurityLogService::logFailedAuthentication($request->input('email'), $request->ip());
+
         return response()->json(['error' => 'Unauthorized'], 401);
     }
 
@@ -117,13 +119,16 @@ class AuthController extends Controller
      */
     public function logout(Request $request)
     {
-        $token = $request->user()->currentAccessToken();
+        $user = $request->user();
+        $token = $user->currentAccessToken();
+        
         if ($token) {
             $token->delete();
         } else {
-            // fallback if currentAccessToken is null (mostly for tests if state is cached incorrectly)
-            $request->user()->tokens()->delete();
+            $user->tokens()->delete();
         }
+
+        $this->authService->clearActiveRole($user);
 
         return response()->json(['success' => true]);
     }

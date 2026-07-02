@@ -47,6 +47,8 @@ class AuthController extends Controller
             return redirect()->intended(route($this->authService->determinePostLoginRedirect($user)));
         }
 
+        \App\Services\SecurityLogService::logFailedAuthentication($request->input('email'), $request->ip());
+
         return back()->withErrors([
             'email' => 'The provided credentials do not match our records.',
         ])->onlyInput('email');
@@ -63,7 +65,7 @@ class AuthController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return redirect('/');
+        return redirect('/')->with('success', 'Anda telah berhasil logout.');
     }
 
     public function showRegister()

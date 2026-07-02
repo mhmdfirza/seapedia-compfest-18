@@ -30,7 +30,12 @@ class RoleController extends Controller
     public function selectRole(SelectRoleRequest $request)
     {
         $role = $request->validated('role');
-        $this->authService->setActiveRole($request->user(), $role);
+        $user = $request->user();
+        $previousRoleRecord = $user->activeRoleRecord ? clone $user->activeRoleRecord : null;
+        
+        $this->authService->setActiveRole($user, $role);
+        
+        \App\Services\SecurityLogService::logSuccessfulRoleSwitch($user->id, $previousRoleRecord->active_role ?? null, $role);
 
         return response()->json([
             'success' => true,
